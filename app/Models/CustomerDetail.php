@@ -1,18 +1,17 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class UserInfo extends Authenticatable implements JWTSubject
+class CustomerDetail extends Authenticatable
 {
-    public $timestamps = false;
-
     protected $table = 'customer_details';
+
     protected $primaryKey = 'email';
     public $incrementing = false;
     protected $keyType = 'string';
+
+    public $timestamps = false; // set to true if you do have created_at/updated_at
 
     protected $fillable = [
         'first_name',
@@ -28,16 +27,6 @@ class UserInfo extends Authenticatable implements JWTSubject
 
     protected $casts = [
         'email' => 'string',
-        'dob' => 'date',
+        'phone_number' => 'integer',
     ];
-
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
-    }
-
-    public function getJWTCustomClaims()
-    {
-        return [];
-    }
 }

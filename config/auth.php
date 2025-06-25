@@ -40,13 +40,28 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        // --- MODIFICATION START: Combined your two 'guards' arrays and added 'admin-api' ---
+        'api' => [
+            'driver' => 'jwt',
+            'provider' => 'users', // This is for your App\Models\UserInfo
+        ],
+        'admin-api' => [ // This is the new guard for your Admin model
+            'driver' => 'jwt',
+            'provider' => 'admins', // This refers to the 'admins' provider below
+        ],
+        'customer-api' => [
+            'driver' => 'jwt',
+            'provider' => 'customers',
+        ],
+        'admin' => [ // 👈 Add this for session-based admin login
+                'driver' => 'session',
+                'provider' => 'admins',
+            ],
+
+        
+        // --- MODIFICATION END ---
     ],
-    'guards' => [
-    'api' => [
-        'driver' => 'jwt',
-        'provider' => 'users',
-    ],
-],
+
 
 
     /*
@@ -71,6 +86,16 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\UserInfo::class,
         ],
+         'admins' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Admin::class, // Your Admin model
+        ],
+        'customers' => [
+    'driver' => 'eloquent',
+    'model' => App\Models\CustomerDetail::class,
+],
+
+        
 
         // 'users' => [
         //     'driver' => 'database',

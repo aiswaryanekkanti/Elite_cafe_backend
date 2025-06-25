@@ -118,6 +118,41 @@ class AuthController extends Controller
     {
         //
     }
+    public function profile(Request $request)
+{
+    $user = auth()->user();
+    return response()->json($user);
+}
+
+// public function updateProfile(Request $request)
+// {
+//     $user = auth()->user();
+
+//     $data = $request->validate([
+//         'first_name'   => 'sometimes|string|max:200',
+//         'last_name'    => 'sometimes|string|max:200',
+//         'phone_number' => 'sometimes|digits:10|unique:user_infos,phone_number,' . $user->id,
+//         'dob'          => 'sometimes|date|nullable',
+//         'address'      => 'sometimes|string|nullable',
+//         'gender'       => 'sometimes|in:Male,Female,Other|nullable',
+//         'city'         => 'sometimes|string|nullable',
+//         'state'        => 'sometimes|string|nullable',
+//         'zip_code'     => 'sometimes|string|nullable',
+//         // 'profile_photo'=> 'sometimes|image|max:2048|nullable',
+//     ]);
+
+//     // if ($request->hasFile('profile_photo')) {
+//     //     // Delete old photo if exists
+//     //     if ($user->profile_photo) {
+//     //         Storage::disk('public')->delete($user->profile_photo);
+//     //     }
+//     //     $data['profile_photo'] = $request->file('profile_photo')->store('profiles', 'public');
+//     // }
+
+//     $user->update($data);
+
+//     return response()->json(['message' => 'Profile updated successfully', 'user' => $user]);
+// }
 }
  
  
