@@ -19,7 +19,7 @@ pipeline {
     stages {
         stage('Clone or Update Repository') {
             steps {
-                dir("/var/www") {
+              dir("${env.WORKSPACE}") {
                     script {
                         def exists = fileExists("${DEPLOY_DIR}/.git")
                         if (exists) {
