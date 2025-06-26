@@ -32,7 +32,7 @@ pipeline {
                             """
                         } else {
                             echo "🆕 Cloning repository..."
-                            sh "sudo git clone -b ${GIT_BRANCH} ${GIT_URL} ${DEPLOY_DIR}"
+                            sh "git clone -b ${GIT_BRANCH} ${GIT_URL} ${DEPLOY_DIR}"
                         }
                     }
                 }
