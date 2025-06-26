@@ -2,14 +2,10 @@ pipeline {
     agent any
 
     environment {
-        // Laravel app settings
-        APP_NAME      = 'Elite_cafe_backend'
-        DEPLOY_DIR    = "/var/www/${APP_NAME}"
-
-        // Git repo settings
         GIT_BRANCH    = 'main'
-        GIT_URL       = "https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/aiswaryanekkanti/Elite_cafe_backend.git"
-        GIT_CREDENTIALS = credentials('elite_cafe_github') // injects GIT_CREDENTIALS_USR and GIT_CREDENTIALS_PSW
+        DEPLOY_PATH   = '/var/www/Elite_cafe_backend'
+        GIT_CREDENTIALS = credentials('elite_cafe_github')
+        GIT_URL = "https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/aiswaryanekkanti/Elite_cafe_backend.git"
     }
 
     options {
@@ -17,23 +13,18 @@ pipeline {
     }
 
     stages {
-        stage('Clone or Update Repository') {
+        stage('Clone Repository') {
             steps {
-              dir("${env.WORKSPACE}") {
-                    script {
-                        def exists = fileExists("${DEPLOY_DIR}/.git")
-                        if (exists) {
-                            echo "🔄 Repository exists. Pulling latest changes..."
-                            sh """
-                                cd ${DEPLOY_DIR}
-                                git fetch origin
-                                git reset --hard origin/${GIT_BRANCH}
-                                git clean -fd
-                            """
-                        } else {
-                            echo "🆕 Cloning repository..."
-                            sh "git clone -b ${GIT_BRANCH} ${GIT_URL} ${DEPLOY_DIR}"
-                        }
+                script {
+                    if (fileExists("${DEPLOY_PATH}/.git")) {
+                        echo "📁 Repository already exists. Pulling latest..."
+                        sh """
+                        cd ${DEPLOY_PATH}
+                        git pull origin ${GIT_BRANCH}
+                        """
+                    } else {
+                        echo "🆕 Cloning repository..."
+                        sh "git clone -b ${GIT_BRANCH} ${GIT_URL} ${DEPLOY_PATH}"
                     }
                 }
             }
@@ -41,59 +32,35 @@ pipeline {
 
         stage('Ensure .env File') {
             steps {
-                dir("${DEPLOY_DIR}") {
-                    sh """
-                    if [ ! -f .env ]; then
-                        cp .env.example .env
-                        echo "✅ .env file created"
-                    else
-                        echo "ℹ️ .env file already exists — skipped"
-                    fi
-                    """
-                }
+                sh """
+                if [ ! -f ${DEPLOY_PATH}/.env ]; then
+                    cp ${DEPLOY_PATH}/.env.example ${DEPLOY_PATH}/.env
+                fi
+                """
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                dir("${DEPLOY_DIR}") {
-                    sh 'composer install --no-dev --optimize-autoloader'
-                }
+                sh "cd ${DEPLOY_PATH} && composer install"
             }
         }
 
         stage('Generate App Key') {
             steps {
-                dir("${DEPLOY_DIR}") {
-                    sh 'php artisan key:generate'
-                }
+                sh "cd ${DEPLOY_PATH} && php artisan key:generate"
             }
         }
 
         stage('Laravel Optimization') {
             steps {
-                dir("${DEPLOY_DIR}") {
-                    sh """
-                    php artisan config:clear
-                    php artisan cache:clear
-                    php artisan route:clear
-                    php artisan view:clear
-                    php artisan optimize:clear
-
-                    php artisan config:cache
-                    php artisan route:cache
-                    php artisan view:cache
-                    """
-                }
-            }
-        }
-
-        stage('Fix Permissions') {
-            steps {
                 sh """
-                sudo chown -R www-data:www-data ${DEPLOY_DIR}
-                sudo chmod -R 775 ${DEPLOY_DIR}/storage
-                sudo chmod -R 775 ${DEPLOY_DIR}/bootstrap/cache
+                cd ${DEPLOY_PATH}
+                php artisan config:clear
+                php artisan cache:clear
+                php artisan route:clear
+                php artisan view:clear
+                php artisan optimize:clear
                 """
             }
         }
@@ -101,7 +68,7 @@ pipeline {
 
     post {
         success {
-            echo '✅ Laravel deployment completed successfully!'
+            echo '✅ Deployment completed successfully!'
         }
         failure {
             echo '❌ Deployment failed. Check the build logs.'
