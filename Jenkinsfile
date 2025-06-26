@@ -2,8 +2,10 @@ pipeline {
     agent any
 
     environment {
-        GIT_BRANCH   = 'main'
-        DEPLOY_PATH  = '/var/www/Elite_cafe_backend'
+        GIT_BRANCH      = 'main'
+        DEPLOY_PATH     = '/var/www/Elite_cafe_backend'
+        GIT_CREDENTIALS = credentials('elite_cafe_github')
+        GIT_URL         = "https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/aiswaryanekkanti/Elite_cafe_backend.git"
     }
 
     options {
@@ -11,22 +13,22 @@ pipeline {
     }
 
     stages {
+
         stage('Clone Repository') {
             steps {
-                git branch: "${GIT_BRANCH}",
-                    credentialsId: 'elite_cafe_github',
-                    url: 'https://github.com/aiswaryanekkanti/Elite_cafe_backend.git'
-            }
-        }
-
-        stage('Copy to Deploy Path') {
-            steps {
                 script {
-                    sh """
-                        sudo rm -rf ${DEPLOY_PATH}
-                        sudo mkdir -p ${DEPLOY_PATH}
-                        sudo cp -r . ${DEPLOY_PATH}
-                    """
+                    if (fileExists("${DEPLOY_PATH}/.git")) {
+                        echo "📁 Repository already exists. Pulling latest changes..."
+                        sh """
+                            cd ${DEPLOY_PATH}
+                            git reset --hard
+                            git clean -fd
+                            git pull origin ${GIT_BRANCH}
+                        """
+                    } else {
+                        echo "🆕 Cloning repository to deployment path..."
+                        sh "git clone -b ${GIT_BRANCH} ${GIT_URL} ${DEPLOY_PATH}"
+                    }
                 }
             }
         }
