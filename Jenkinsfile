@@ -45,6 +45,16 @@ pipeline {
                 sh "cd ${DEPLOY_PATH} && composer install"
             }
         }
+     stage('Set File Permissions') {
+         steps {
+           sh """
+            cd ${DEPLOY_PATH}
+        sudo chown -R www-data:www-data ${DEPLOY_PATH}
+        sudo chmod -R 775 storage
+        sudo chmod -R 775 bootstrap/cache
+        """
+    }
+}
 
         stage('Generate App Key') {
             steps {
