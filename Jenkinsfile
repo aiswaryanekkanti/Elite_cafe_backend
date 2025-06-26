@@ -46,15 +46,26 @@ pipeline {
             }
         }
      stage('Set File Permissions') {
-         steps {
-           sh """
-            cd ${DEPLOY_PATH}
+    steps {
+        sh """
+        cd ${DEPLOY_PATH}
+
+        # Set ownership for everything
         sudo chown -R www-data:www-data ${DEPLOY_PATH}
-        sudo chmod -R 775 storage
-        sudo chmod -R 775 bootstrap/cache
+
+        # Ensure .env is owned and writable
+        sudo chmod 664 .env || true
+        sudo chown www-data:www-data .env || true
+
+        # Ensure storage & cache are accessible
+        sudo find storage -type d -exec chmod 775 {} \\;
+        sudo find storage -type f -exec chmod 664 {} \\;
+        sudo find bootstrap/cache -type d -exec chmod 775 {} \\;
+        sudo find bootstrap/cache -type f -exec chmod 664 {} \\;
         """
     }
 }
+
 
         stage('Generate App Key') {
             steps {
