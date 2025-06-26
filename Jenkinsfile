@@ -2,18 +2,18 @@ pipeline {
     agent any
 
     environment {
-        // Basic app config
+        // Laravel app settings
         APP_NAME      = 'Elite_cafe_backend'
         DEPLOY_DIR    = "/var/www/${APP_NAME}"
 
-        // Git config
-        GIT_URL       = 'https://github.com/aiswaryanekkanti/Elite_cafe_backend.git'
+        // Git repo settings
         GIT_BRANCH    = 'main'
-        GIT_CREDENTIALS_ID = 'elite_cafe_github'
+        GIT_URL       = "https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/aiswaryanekkanti/Elite_cafe_backend.git"
+        GIT_CREDENTIALS = credentials('elite_cafe_github') // injects GIT_CREDENTIALS_USR and GIT_CREDENTIALS_PSW
     }
 
     options {
-        timeout(time: 30, unit: 'MINUTES') // Prevent stuck builds
+        timeout(time: 30, unit: 'MINUTES')
     }
 
     stages {
@@ -32,7 +32,7 @@ pipeline {
                             """
                         } else {
                             echo "🆕 Cloning repository..."
-                            sh "git clone -b ${GIT_BRANCH} https://${GIT_CREDENTIALS_USR}:${GIT_CREDENTIALS_PSW}@github.com/aiswaryanekkanti/Elite_cafe_backend.git ${DEPLOY_DIR}"
+                            sh "git clone -b ${GIT_BRANCH} ${GIT_URL} ${DEPLOY_DIR}"
                         }
                     }
                 }
@@ -106,10 +106,5 @@ pipeline {
         failure {
             echo '❌ Deployment failed. Check the build logs.'
         }
-    }
-
-    environment {
-        // Injects credentials into GIT_CREDENTIALS_USR and GIT_CREDENTIALS_PSW
-        GIT_CREDENTIALS = credentials('elite_cafe_github')
     }
 }
