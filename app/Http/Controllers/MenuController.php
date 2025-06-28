@@ -10,16 +10,23 @@ class MenuController extends Controller
 {
     public function menuinfo()
 {
-    // ✅ Correctly assign the filtered items
-    $menuItems = MenuInfo::where('is_deleted', 0)->get();
-
-    // Group by category
+    $menuItems = MenuInfo::where('is_deleted', 0)
+    //new
+        ->orderBy('category')
+        ->orderBy('name')
+        ->get()
+        ->map(function ($item) {
+            $item->full_img_url = $item->img ? url($item->img) : null;
+            return $item;
+        });
+//new
     $items = $menuItems->groupBy('category');
-   
+
     return response()->json([
-        'menuItems' => $menuItems,
-        'items' => $items,
+        'status' => 'success',
+        'data' => $items
     ]);
 }
+
 
 }

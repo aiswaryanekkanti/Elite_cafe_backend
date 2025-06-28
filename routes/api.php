@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\ApiStaffController;
 use App\Http\Controllers\TableController;
 use App\Http\Controllers\TableReservationController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\CartController;
 
 
 // Route::prefix('admin')->middleware('auth:admin-api')->group(function () {
@@ -76,6 +77,9 @@ Route::get('/admin/orders', [AdminOrderController::class, 'index']);
 // })->middleware('auth:sanctum');
 
 Route::post('/contact', [ContactUsController::class, 'store']); 
+// In your API routes (routes/api.php)
+// Route::get('/admin/menu/categories', [MenuApiController::class, 'getCategories']);
+// Route::get('/admin/menu/subcategories', [MenuApiController::class, 'getSubcategories']);
 
 
 
@@ -115,16 +119,17 @@ Route::post('/review',[ReviewController::class,'reviewdata']);
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 
 // Admin menu management (protect with middleware in real app)
-Route::middleware('auth:admin-api')->group(function () {
+// Route::middleware('auth:admin-api')->group(function () {
     Route::get('/admin/menu', [AdminMenuController::class, 'index']);
     Route::post('/admin/menu', [AdminMenuController::class, 'store']);
     Route::put('/admin/menu/{id}', [AdminMenuController::class, 'update']);
-    Route::delete('/admin/menu/{id}', [AdminMenuController::class, 'destroy']);
-    Route::get('/admin/menu/hidden', [AdminMenuController::class, 'hiddenItems']);
+    // Route::delete('/admin/menu/{id}', [AdminMenuController::class, 'destroy']);
+    // Route::get('/admin/menu/hidden', [AdminMenuController::class, 'hiddenItems']);
     Route::put('/admin/menu/{id}/toggle', [AdminMenuController::class, 'toggleVisibility']);
+    
 
 
-});
+// });
 
 Route::middleware('auth:admin-api')->prefix('admin')->group(function () {
     Route::get('/staff', [ApiStaffController::class, 'index']);            // List all active staff (not deleted)
@@ -138,4 +143,5 @@ Route::middleware('auth:admin-api')->prefix('admin')->group(function () {
     Route::patch('/staff/{id}/restore', [ApiStaffController::class, 'restore']);  // Restore soft deleted staff
 });
 
+Route::post('/placeorder',[CartController::class,'storeorder']);
  

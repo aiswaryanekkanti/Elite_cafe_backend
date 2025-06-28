@@ -11,7 +11,7 @@ class Order extends Model
 
  protected $fillable = [
  'customer_email', 'name', 'phone', 'type', 'status',
- 'total', 'payment_method', 'pincode', 'locality', 'address'
+ 'total', 'payment_method', 'pincode', 'address'
  ];
  public function customer()
     {
