@@ -1,42 +1,48 @@
 <?php
-
+ 
 namespace App\Models;
-
+ 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
+use Illuminate\Database\Eloquent\SoftDeletes; // Add this trait for deleted_at
+ 
 class Staff extends Model
 {
-    use HasFactory, SoftDeletes;
-
+    use HasFactory, SoftDeletes; // Use SoftDeletes trait
+ 
     protected $table = 'staff';
-
+ 
+    // Specify the primary key if it's not 'id'
     protected $primaryKey = 'staff_id';
-
-    public $incrementing = true;
-
-    protected $keyType = 'int';
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+ 
     protected $fillable = [
         'first_name',
         'last_name',
         'email',
-        'phone',
-        'address',
-        'role',
+        'phone', // Add phone
+        'address', // Add address
+        'role', // 'waiter', 'manager', 'cleaner', 'chef'
     ];
-
+ 
     /**
-     * The attributes that should be mutated to dates.
-     * (Optional in Laravel 8+ as SoftDeletes handles this)
-     *
-     * @var array<int, string>
+     * Get the table assignments for the staff member.
      */
-    protected $dates = ['deleted_at'];
+    public function tableAssignments()
+    {
+        // Use 'staff_id' as the foreign key in the pivot table
+        return $this->hasMany(StaffTableAssignment::class, 'staff_id', 'staff_id');
+    }
+ 
+    /**
+     * Get the tables assigned to this staff member through assignments.
+     */
+    public function assignedTables()
+    {
+        // Adjust foreign keys for the pivot table if 'staff_id' is used
+        return $this->belongsToMany(RestaurantTable::class, 'staff_table_assignments', 'staff_id', 'restaurant_table_id')
+                    ->withPivot('assignment_date', 'shift_type')
+                    ->withTimestamps();
+    }
 }
+ 
+ 

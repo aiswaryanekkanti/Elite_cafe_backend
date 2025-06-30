@@ -42,7 +42,16 @@ Route::middleware('auth:api')->group(function () {
 // });
 // Route::middleware('auth:admin-api')->get('/admin/customers', [AdminCustomerApiController::class, 'index']);
 
-Route::middleware('auth:admin-api')->get('/admin/customers', [AdminCustomerApiController::class, 'index']);
+// Route::middleware('auth:admin-api')->get('/admin/customers', [AdminCustomerApiController::class, 'index']);
+Route::prefix('admin/customers')->middleware(['auth:admin-api'])->group(function () {
+    Route::get('/', [AdminCustomerApiController::class, 'index']);
+    Route::post('{email}/soft-delete', [AdminCustomerApiController::class, 'softDelete']);
+    Route::post('{email}/restore', [AdminCustomerApiController::class, 'restore']);
+    Route::post('{email}/suspend', [AdminCustomerApiController::class, 'suspend']);
+    Route::post('{email}/unsuspend', [AdminCustomerApiController::class, 'unsuspend']);
+    Route::post('{email}/notes', [AdminCustomerApiController::class, 'updateNotes']);
+    Route::get('{email}/logins', [AdminCustomerApiController::class, 'loginHistory']);
+});
 
 Route::middleware('auth:api')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile']);
@@ -98,7 +107,8 @@ Route::post('/verify-otp',[AuthController::class, 'otp']);
 Route::post('/send-otp',[AuthController::class, 'otp']);
 Route::get('/tableinfo', [TableController::class, 'tableinfo']);
 
-Route::post('/tablereservation',[TableReservationController::class,'reservationdetails']);
+Route::post('/reservationdetails', [ReservationController::class, 'reservationdetails']);
+ 
 
 
 // Route::middleware('auth:sanctum')->group(function() {
@@ -144,4 +154,6 @@ Route::middleware('auth:admin-api')->prefix('admin')->group(function () {
 });
 
 Route::post('/placeorder',[CartController::class,'storeorder']);
- 
+ use App\Http\Controllers\Backend\RevenueController;
+
+Route::get('/admin/revenue', [RevenueController::class, 'index'])->name('api.admin.revenue');

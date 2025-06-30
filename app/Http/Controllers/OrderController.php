@@ -11,8 +11,9 @@ class OrderController extends Controller
 {
     public function orderinfo()
     {
+        
      
-        $menuItems = MenuInfo::all();
+       $menuItems = MenuInfo::where('is_deleted', 0)->get();
  
  
         $items = $menuItems->groupBy('category');

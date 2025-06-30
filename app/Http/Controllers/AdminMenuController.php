@@ -13,10 +13,11 @@ class AdminMenuController extends Controller
     // List all active menu items
     public function index()
 {
-    $menuItems = MenuInfo::where('is_deleted', 0)
-    ->orderBy('category')
-    ->orderBy('name')
-    ->get();
+    // $menuItems = MenuInfo::where('is_deleted', 0)
+    // // ->orderBy('category')
+    // // ->orderBy('name')
+    // ->get();
+$menuItems = MenuInfo::all();
 
 
     return response()->json([

@@ -1,127 +1,142 @@
 <?php
- 
+
 namespace App\Http\Controllers;
- 
+
 use App\Models\UserInfo;
+use App\Models\CustomerLogin;  // You need to create this model/table for login history
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Validation\Rules\Password;
- 
+
 class AuthController extends Controller
 {
+    // User signup
     public function signup(Request $request)
     {
- 
- 
         $validated = $request->validate([
-            'first_name' => 'required|string|max:200',
-            'last_name' => 'required|string|max:200',
-            'phone_number' => 'required|digits:10',
-            'email' => 'required|email|max:255',
-            'password' => [
+            'first_name'   => 'required|string|max:200',
+            'last_name'    => 'required|string|max:200',
+            'phone_number' => 'required|digits:10|unique:user_infos,phone_number',
+            'email'        => 'required|email|max:255|unique:user_infos,email',
+            'password'     => [
                 'required',
                 'string',
-                Password::min(8)
-                    ->mixedCase()     // at least one uppercase + lowercase
-                    ->numbers()       // at least one number
-                    ->symbols(),      // at least one special character
+                Password::min(8)->mixedCase()->numbers()->symbols(),
             ],
-        ]);;
- 
+        ]);
+
         $validated['password'] = Hash::make($validated['password']);
- 
+
         $user = UserInfo::create($validated);
- 
-       try {
-        $token = JWTAuth::fromUser($user);
-    } catch (JWTException $e) {
-        return response()->json(['error' => 'Could not create token'], 500);
-    }
- 
+
+        try {
+            $token = JWTAuth::fromUser($user);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Could not create token'], 500);
+        }
+
         return response()->json([
-            'status'=>'success',
-            'message' => 'User created successfully!',
-            'user' => $user,
+            'status'       => 'success',
+            'message'      => 'User created successfully!',
+            'user'         => $user,
             'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => JWTAuth::factory()->getTTL() * 60,
+            'token_type'   => 'bearer',
+            'expires_in'   => JWTAuth::factory()->getTTL() * 60,
         ], 201);
     }
- 
- 
+
+    // User login (by email or phone)
     public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'identifier' => 'required',  // can be email or phone number
-            'password' => 'required',
-        ]);
- 
-        $identifier = $credentials['identifier'];
-        $password = $credentials['password'];
- 
-        // Check if identifier is an email or phone number
-        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
-            // identifier is email
-            $user = UserInfo::where('email', $identifier)->first();
- 
-            if (!$user) {
-                return response()->json([
-                    'status'=>'failure',
-                    'message' => 'Invalid credentials.',
-                    'errors' => [
-                        'identifier' => ['Email is incorrect.'],
-                    ],
-                ], 401);
-            }
-        } else {
-            // identifier is phone number (basic validation, you can improve this)
-            $user = UserInfo::where('phone_number', $identifier)->first();
- 
-            if (!$user) {
-                return response()->json([
-                    'message' => 'Invalid credentials.',
-                    'errors' => [
-                        'identifier' => ['Phone number is incorrect.'],
-                    ],
-                ], 401);
-            }
-        }
- 
-        // Check password
-        if (!Hash::check($password, $user->password)) {
-            return response()->json([
-                'message' => 'Invalid credentials.',
-                'errors' => [
-                    'password' => ['Password is incorrect.'],
-                ],
-            ], 401);
-        }
- 
-       try {
+{
+    $credentials = $request->validate([
+        'identifier' => 'required',  // email or phone number
+        'password'   => 'required',
+    ]);
+
+    $identifier = $credentials['identifier'];
+    $password = $credentials['password'];
+
+    $user = filter_var($identifier, FILTER_VALIDATE_EMAIL)
+        ? UserInfo::where('email', $identifier)->first()
+        : UserInfo::where('phone_number', $identifier)->first();
+
+    // Check if user exists and password matches
+    if (!$user || !Hash::check($password, $user->password)) {
+        return response()->json([
+            'status'  => 'failure',
+            'message' => 'Invalid credentials.',
+        ], 401);
+    }
+
+    // **Add suspension check here:**
+    
+    if ($user->is_suspended) {
+        return response()->json([
+            'status'  => 'failure',
+            'message' => 'Your account is suspended. Please contact support.',
+        ], 403);
+    }
+
+    try {
         $token = JWTAuth::fromUser($user);
     } catch (JWTException $e) {
         return response()->json(['error' => 'Could not create token'], 500);
     }
- 
-        return response()->json([
-            'message' => 'Login successful',
-            'user' => $user,
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => 3600,
-        ]);
+
+    // Log login history only if allowed
+    CustomerLogin::create([
+        'customer_email' => $user->email,
+        'login_at'       => now(),
+        'ip_address'     => $request->ip(),
+        'device'         => $request->userAgent(),
+    ]);
+
+    return response()->json([
+        'status'       => 'success',
+        'message'      => 'Login successful',
+        'user'         => $user,
+        'access_token' => $token,
+        'token_type'   => 'bearer',
+        'expires_in'   => JWTAuth::factory()->getTTL() * 60,
+    ]);
+}
+
+
+    // Logout (invalidate token)
+    public function logout(Request $request)
+    {
+        $user = auth()->user();
+        if ($user) {
+            // Update logout time in login history if you want
+            $lastLogin = CustomerLogin::where('customer_email', $user->email)
+                ->whereNull('logout_at')
+                ->latest('login_at')
+                ->first();
+
+            if ($lastLogin) {
+                $lastLogin->update(['logout_at' => now()]);
+            }
+
+            JWTAuth::invalidate(JWTAuth::getToken());
+            return response()->json(['status' => 'success', 'message' => 'Logged out successfully']);
+        }
+
+        return response()->json(['status' => 'failure', 'message' => 'No authenticated user'], 401);
     }
- 
+
+    // Fetch profile of authenticated user
+    public function profile(Request $request)
+    {
+        return response()->json(['status' => 'success', 'user' => auth()->user()]);
+    }
+
+    // OTP placeholder
     public function otp(Request $request)
     {
-        //
+        return response()->json(['message' => 'OTP functionality not implemented yet.']);
     }
-    public function profile(Request $request)
-{
-    $user = auth()->user();
-    return response()->json($user);
 }
 
 // public function updateProfile(Request $request)
@@ -153,6 +168,6 @@ class AuthController extends Controller
 
 //     return response()->json(['message' => 'Profile updated successfully', 'user' => $user]);
 // }
-}
+
  
  
