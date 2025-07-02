@@ -21,6 +21,10 @@ use App\Http\Controllers\TableController;
 use App\Http\Controllers\TableReservationController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\NewsletterController;
+
+Route::post('/subscribe', [NewsletterController::class, 'subscribe']);
+Route::post('/cart/update', [CartController::class, 'updateCart'])->name('cart_post');
 
 
 // Route::prefix('admin')->middleware('auth:admin-api')->group(function () {
@@ -107,7 +111,7 @@ Route::post('/verify-otp',[AuthController::class, 'otp']);
 Route::post('/send-otp',[AuthController::class, 'otp']);
 Route::get('/tableinfo', [TableController::class, 'tableinfo']);
 
-Route::post('/reservationdetails', [ReservationController::class, 'reservationdetails']);
+Route::post('reservationdetails', [ReservationController::class, 'reservationdetails']);
  
 
 

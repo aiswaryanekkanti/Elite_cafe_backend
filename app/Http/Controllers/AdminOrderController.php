@@ -3,7 +3,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
+use App\Models\CustOrderInfo;
 use Illuminate\Http\Request;
 use Carbon\Carbon;  // <-- correct import here
 
@@ -11,7 +11,7 @@ class AdminOrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::query();
+        $query = CustOrderInfo::query();
 
         $dateFilter = $request->query('date_filter');
 
