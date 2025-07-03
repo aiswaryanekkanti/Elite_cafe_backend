@@ -21,6 +21,9 @@ class RestaurantTable extends Model
     protected $fillable = [
         'name',     // e.g., 'Table Two 1', 'Table Four 5'
         'capacity', // Integer, e.g., 2, 4, 5
+        'table_type'
+        
+        
     ];
  
     /**
