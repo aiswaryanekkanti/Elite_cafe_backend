@@ -13,40 +13,45 @@ use Illuminate\Validation\Rules\Password;
 class AuthController extends Controller
 {
     // User signup
-    public function signup(Request $request)
+   public function signup(Request $request)
     {
+ 
+ 
         $validated = $request->validate([
-            'first_name'   => 'required|string|max:200',
-            'last_name'    => 'required|string|max:200',
-            'phone_number' => 'required|digits:10|unique:user_infos,phone_number',
-            'email'        => 'required|email|max:255|unique:user_infos,email',
-            'password'     => [
+            'first_name' => 'required|string|max:200',
+            'last_name' => 'required|string|max:200',
+            'phone_number' => 'required|digits:10',
+            'email' => 'required|email|max:255',
+            'password' => [
                 'required',
                 'string',
-                Password::min(8)->mixedCase()->numbers()->symbols(),
+                Password::min(8)
+                    ->mixedCase()     // at least one uppercase + lowercase
+                    ->numbers()       // at least one number
+                    ->symbols(),      // at least one special character
             ],
-        ]);
-
+        ]);;
+ 
         $validated['password'] = Hash::make($validated['password']);
-
+ 
         $user = UserInfo::create($validated);
-
-        try {
-            $token = JWTAuth::fromUser($user);
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'Could not create token'], 500);
-        }
-
+ 
+       try {
+        $token = JWTAuth::fromUser($user);
+    } catch (JWTException $e) {
+        return response()->json(['error' => 'Could not create token'], 500);
+    }
+ 
         return response()->json([
-            'status'       => 'success',
-            'message'      => 'User created successfully!',
-            'user'         => $user,
+            'status'=>'success',
+            'message' => 'User created successfully!',
+            'user' => $user,
             'access_token' => $token,
-            'token_type'   => 'bearer',
-            'expires_in'   => JWTAuth::factory()->getTTL() * 60,
+            'token_type' => 'bearer',
+            'expires_in' => JWTAuth::factory()->getTTL() * 60,
         ], 201);
     }
-
+ 
     // User login (by email or phone)
     public function login(Request $request)
 {

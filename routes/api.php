@@ -109,7 +109,7 @@ Route::post('/verify-otp',[AuthController::class, 'otp']);
 Route::post('/send-otp',[AuthController::class, 'otp']);
 Route::get('/tableinfo', [TableController::class, 'tableinfo']);
 
-Route::post('/reservationdetails', [ReservationController::class, 'reservationdetails']);
+Route::post('reservationdetails', [ReservationController::class, 'reservationdetails']);
  
 
 
