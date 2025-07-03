@@ -104,6 +104,8 @@ Route::post('/contact', [ContactUsController::class, 'store']);
 Route::get('/menu',[MenuController::class,'menuinfo']);
 // Route::get('/order', [OrderController::class, 'orderinfo'])->name('cart.view');
 Route::get('/order', [OrderController::class, 'orderinfo']);
+Route::post('/placeorder', [CartController::class, 'storeOrder']);
+
 
 Route::post('/signup',[AuthController::class, 'signup']);
 Route::post('/login',[AuthController::class, 'login']);
@@ -157,7 +159,7 @@ Route::middleware('auth:admin-api')->prefix('admin')->group(function () {
     Route::patch('/staff/{id}/restore', [ApiStaffController::class, 'restore']);  // Restore soft deleted staff
 });
 
-Route::post('/placeorder',[CartController::class,'storeorder']);
+
  use App\Http\Controllers\Backend\RevenueController;
 
 Route::get('/admin/revenue', [RevenueController::class, 'index'])->name('api.admin.revenue');
