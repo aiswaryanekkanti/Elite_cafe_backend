@@ -21,10 +21,8 @@ use App\Http\Controllers\TableController;
 use App\Http\Controllers\TableReservationController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\NewsletterController;
+use Illuminate\Support\Facades\Auth;
 
-Route::post('/subscribe', [NewsletterController::class, 'subscribe']);
-Route::post('/cart/update', [CartController::class, 'updateCart'])->name('cart_post');
 
 
 // Route::prefix('admin')->middleware('auth:admin-api')->group(function () {
@@ -121,10 +119,8 @@ Route::post('reservationdetails', [ReservationController::class, 'reservationdet
 //     Route::post('/checkout/delivery', [CheckoutController::class, 'delivery']);
 //     // Add other cart/order APIs as needed
 // });
-Route::middleware('auth:customer-api')->group(function () {
-    Route::get('/customer/profile', function () {
-        return response()->json(auth()->user());
-    });
+Route::middleware('auth:customer-api')->get('/customer/profile', function () {
+    return response()->json(Auth::guard('customer-api')->user());
 });
 
 
@@ -158,6 +154,10 @@ Route::middleware('auth:admin-api')->prefix('admin')->group(function () {
 });
 
 Route::post('/placeorder',[CartController::class,'storeorder']);
- use App\Http\Controllers\Backend\RevenueController;
 
-Route::get('/admin/revenue', [RevenueController::class, 'index'])->name('api.admin.revenue');
+
+// Route::get('/admin/revenue', [RevenueController::class, 'index'])->name('api.admin.revenue');
+
+
+Route::post('/admin/offline_reservation',[TableController::class, 'getAvailableOfflineTables']);
+Route::post('/admin/offlinereservation',[TableController::class, 'storeOfflineReservation']);
