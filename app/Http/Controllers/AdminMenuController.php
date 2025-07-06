@@ -11,48 +11,17 @@ use Illuminate\Support\Facades\Storage; // <-- Add this for file operations
 class AdminMenuController extends Controller
 {
     // List all active menu items
-    // In your API controller
-public function index(Request $request)
+    public function index()
 {
-    $perPage = $request->input('per_page', 10);
-    $page = $request->input('page', 1);
-    
-    $query = MenuInfo::where('is_deleted', 0);
-    
-    // Apply filters if they exist
-    if ($request->has('category')) {
-        $query->where('category', $request->category);
-    }
-    
-    if ($request->has('subcategory')) {
-        $query->where('subcategory', $request->subcategory);
-    }
-    
-    if ($request->has('search')) {
-        $query->where('name', 'like', '%'.$request->search.'%');
-    }
-    
-    // Apply sorting
-    $sortBy = $request->input('sort_by', 'name');
-    $sortOrder = $request->input('sort_order', 'asc');
-    $query->orderBy($sortBy, $sortOrder);
-    
-    $menuItems = $query->paginate($perPage, ['*'], 'page', $page);
+    // $menuItems = MenuInfo::where('is_deleted', 0)
+    // // ->orderBy('category')
+    // // ->orderBy('name')
+    // ->get();
+$menuItems = MenuInfo::all();
+
 
     return response()->json([
-        'data' => $menuItems->items(),
-        'meta' => [
-            'current_page' => $menuItems->currentPage(),
-            'last_page' => $menuItems->lastPage(),
-            'per_page' => $menuItems->perPage(),
-            'total' => $menuItems->total(),
-        ],
-        'links' => [
-            'first' => $menuItems->url(1),
-            'last' => $menuItems->url($menuItems->lastPage()),
-            'prev' => $menuItems->previousPageUrl(),
-            'next' => $menuItems->nextPageUrl(),
-        ],
+        'data' => $menuItems
     ]);
 }
 
