@@ -25,11 +25,13 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\Api\ReservationApiController;
 use App\Http\Controllers\BillController;
+use App\Http\Controllers\DashboardController;
 
 
 Route::get('/bills', [BillController::class, 'index']);
 Route::get('/bills/{id}', [BillController::class, 'show']);
 
+    Route::get('/admin/dashboard-counts', [DashboardController::class, 'dashboardCounts']);
 
 
 

@@ -26,8 +26,13 @@ class OrderItem extends Model
     }
 
     // Define relationship with MenuItem (optional, can be null if original menu item deleted)
+    // public function menuItem()
+    // {
+    //     return $this->belongsTo(MenuItem::class);
+    // }
     public function menuItem()
-    {
-        return $this->belongsTo(MenuItem::class);
-    }
+{
+    return $this->belongsTo(MenuItem::class, 'item_id', 'id');
+}
+
 }

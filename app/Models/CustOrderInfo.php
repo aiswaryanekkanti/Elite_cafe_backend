@@ -27,6 +27,10 @@ class CustOrderInfo extends Model
         'created_at',
         'updated_at',
     ];
+    public function orderItems()
+{
+    return $this->hasMany(OrderItem::class, 'order_id', 'id');
+}
 }
  
  

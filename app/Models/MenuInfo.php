@@ -34,6 +34,10 @@ class MenuInfo extends Model
 // {
 //     return $this->hasOne(MenuItemStock::class, 'menu_item_id');
 // }
+public function menuItem()
+{
+    return $this->belongsTo(MenuItem::class, 'item_id', 'id');
+}
 
 }
  
