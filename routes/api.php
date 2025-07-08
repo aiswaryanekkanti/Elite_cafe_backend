@@ -22,10 +22,14 @@ use App\Http\Controllers\TableReservationController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\CartController;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\Api\ReservationApiController;
 use App\Http\Controllers\BillController;
 use App\Http\Controllers\DashboardController;
+
+
+Route::post('/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+
 
 
 Route::get('/bills', [BillController::class, 'index']);
@@ -66,15 +70,23 @@ Route::middleware('auth:api')->group(function () {
 // Route::middleware('auth:admin-api')->get('/admin/customers', [AdminCustomerApiController::class, 'index']);
 
 // Route::middleware('auth:admin-api')->get('/admin/customers', [AdminCustomerApiController::class, 'index']);
+
 Route::prefix('admin/customers')->middleware(['auth:admin-api'])->group(function () {
     Route::get('/', [AdminCustomerApiController::class, 'index']);
-    Route::post('{email}/soft-delete', [AdminCustomerApiController::class, 'softDelete']);
-    Route::post('{email}/restore', [AdminCustomerApiController::class, 'restore']);
-    Route::post('{email}/suspend', [AdminCustomerApiController::class, 'suspend']);
-    Route::post('{email}/unsuspend', [AdminCustomerApiController::class, 'unsuspend']);
-    Route::post('{email}/notes', [AdminCustomerApiController::class, 'updateNotes']);
-    Route::get('{email}/logins', [AdminCustomerApiController::class, 'loginHistory']);
+    Route::get('/summary', [AdminCustomerApiController::class, 'summary']);
+    Route::get('/recent', [AdminCustomerApiController::class, 'recentCustomers']);
+    Route::get('/top-active', [AdminCustomerApiController::class, 'topActiveCustomers']);
+    Route::get('/search', [AdminCustomerApiController::class, 'search']);
+    Route::get('/paginated', [AdminCustomerApiController::class, 'paginatedList']);
+    Route::get('/{email}/detail', [AdminCustomerApiController::class, 'customerDetail']);
+    Route::get('/{email}/logins', [AdminCustomerApiController::class, 'loginHistory']);
+    Route::put('/{email}/soft-delete', [AdminCustomerApiController::class, 'softDelete']);
+    Route::put('/{email}/restore', [AdminCustomerApiController::class, 'restore']);
+    Route::put('/{email}/suspend', [AdminCustomerApiController::class, 'suspend']);
+    Route::put('/{email}/unsuspend', [AdminCustomerApiController::class, 'unsuspend']);
+    Route::put('/{email}/notes', [AdminCustomerApiController::class, 'updateNotes']);
 });
+
 
 Route::middleware('auth:api')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile']);
