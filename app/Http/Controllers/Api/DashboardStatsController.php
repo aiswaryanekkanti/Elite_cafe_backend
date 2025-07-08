@@ -7,8 +7,8 @@ namespace App\Http\Controllers\Api;
 // use App\Models\MenuInfo;
 // use App\Models\CustomerDetail;
 
-// class DashboardStatsController extends Controller
-// {
+class DashboardStatsController extends Controller
+{
 //     public function getCounts()
 //     {
 //         return response()->json([
@@ -18,4 +18,4 @@ namespace App\Http\Controllers\Api;
 //             'customers' => CustomerDetail::count(),
 //         ]);
 //     }
-// }
+}
