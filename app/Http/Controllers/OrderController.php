@@ -23,9 +23,9 @@ class OrderController extends Controller
             'menuItems' => $menuItems,
             'items' => $items,
             
-        ]);
+        ]); 
     }
-    // app/Models/Order.php
+
 public function customer()
 {
     return $this->belongsTo(CustomerDetail::class, 'customer_email', 'email');
